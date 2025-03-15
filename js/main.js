@@ -16,6 +16,16 @@ Vue.component('column', {
     template: `
         <div class="column">
             <h2>{{column.title}} ({{column.cards.length}})</h2>
+            <cardTask 
+                v-for="(card, index) in column.cards"
+                :key="card.id"
+                :card="card"
+                :cardIndex="index"
+                :is-first-column-block="isFirstColumnBlock"
+                @save-data="$emit('save-data')"
+                @task-updated="$emit('task-updated', columnIndex, index)">
+            </cardTask>
+            <button v-if="canAddCard" @click="$emit('add-card', columnIndex)">Добавить карточку</button>
         </div>
     `,
     computed: {
@@ -41,21 +51,21 @@ Vue.component('cardTask', {
     },
     template: `
         <div class="card">
-            <h3>{{card.title}}</h3>
-            <input type="text" placeholder="Название карточки">
+            <h3 v-if="!card.isEditing">{{card.title}}</h3>
+            <input type="text" placeholder="Название карточки" v-if="card.isEditing" v-model="card.newTitle">
             <div>
-                <div class="task">
+                <div class="task" :key="index" v-for="(task, index) in card.tasks">
                     <label>
-                        <input type="checkbox">
-                        <span>{{task.text}}</span>
-                        <input type="text" placeholder="Введиде задачу">
+                        <input type="checkbox" v-model="task.completed" :disabled="isFirstColumnBlocked || !!card.completedAt" @change="$emit('task-updated', cardIndex)">
+                        <span v-if="!task.isEditing">{{task.text}}</span>
+                        <input type="text" placeholder="Введиде задачу" v-if="task.isEditing" v-model="task.text">
                     </label>
-                    <button>Сохранить</button>
+                    <button v-if="task.isEditing" @click="saveTask(index)">Сохранить</button>
                 </div>
             </div>
-            <button>Добавить пункт</button>
-            <button>Сохранить заголовок</button>
-            <p>Завершено: {{card.completedAt}}</p> 
+            <button v-if="canAddTask" @click="addTask">Добавить пункт</button>
+            <button v-if="card.isEditing" @click="saveCardTitle">Сохранить заголовок</button>
+            <p v-if="card.completedAt">Завершено: {{card.completedAt}}</p> 
         </div>
     `,
     methods: {
@@ -129,7 +139,10 @@ const app = new Vue({
             }
             this.columns[toIndex].cards.push(card);
             this.saveData();
-        }
+        },
+        saveData() {
+            localStorage.setItem('columns', JSON.stringify(this.columns));
+        },
     },
     computed: {
         isFirstColumnBlock() {
