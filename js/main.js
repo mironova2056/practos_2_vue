@@ -93,5 +93,47 @@ const app = new Vue({
                 { title: "Done", cards: [] }
             ]
         }
-    }
+    },
+    methods: {
+        addCard(columnIndex){
+            const newCard = {
+              id: Date.now(),
+              title: '',
+              tasks: [{text: '', completed: false, isEditing: true}],
+              completedAt: null,
+              isEditing: true,
+              newTitle: ''
+            };
+            this.columns[columnIndex].cards.push(newCard);
+            this.saveData();
+        },
+        addTask(columnIndex, cardIndex, text){
+            this.columns[columnIndex].cards[cardIndex].tasks.push({ text, completed: false });
+            this.saveData();
+        },
+        updateColumns(columnIndex, cardIndex){
+            const tasks = this.columns[columnIndex].cards[cardIndex].tasks;
+            const completedTasks = tasks.filter(task => task.completed);
+            const progress = completedTasks.length / tasks.length;
+            if (columnIndex === 0 && progress > 0.5 && this.columns[1].cards.length < 5) {
+                this.moveCard(columnIndex, cardIndex, 1);
+            } else if (progress === 1) {
+                this.moveCard(columnIndex, cardIndex, 2);
+            }
+            this.saveData();
+        },
+        moveCard(columnIndex, cardIndex, toIndex){
+            const [card] = this.columns[columnIndex].cards.splice(cardIndex, 1);
+            if (toIndex === 2) {
+                card.completedAt = new Date().toLocaleString();
+            }
+            this.columns[toIndex].cards.push(card);
+            this.saveData();
+        }
+    },
+    computed: {
+        isFirstColumnBlock() {
+            return this.columns[1].cards.length >= 5;
+        }
+    },
 })
