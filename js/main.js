@@ -19,6 +19,9 @@ Vue.component('column', {
         </div>
     `,
     computed: {
+        canAddCard(){
+            return his.columnIndex === 0 && this.column.cards.length < 3 && !this.isFirstColumnBlocked;
+        }
     },
 })
 Vue.component('cardTask', {
@@ -77,6 +80,18 @@ Vue.component('cardTask', {
     computed: {
         canAddTask(){
             return !this.card.completedAt && this.card.tasks.length < 5 && !this.isFirstColumnBlock;
+        }
+    }
+})
+const app = new Vue({
+    el: '#app',
+    data(){
+        return {
+            columns: JSON.parse(localStorage.getItem('columns')) || [
+                { title: "New", cards: [] },
+                { title: "In process", cards: [] },
+                { title: "Done", cards: [] }
+            ]
         }
     }
 })
