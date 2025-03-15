@@ -143,6 +143,15 @@ const app = new Vue({
         saveData() {
             localStorage.setItem('columns', JSON.stringify(this.columns));
         },
+        clearLocalStorage() {
+            localStorage.clear();
+            this.columns = [
+                { title: "New", cards: [] },
+                { title: "In process", cards: [] },
+                { title: "Done", cards: [] }
+            ];
+            alert("Все данные очищены!");
+        },
     },
     computed: {
         isFirstColumnBlock() {
