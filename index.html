@@ -12,8 +12,18 @@
 <body>
     <div id="app">
         <div class="columns">
-
+            <column
+                    v-for="(column, index) in columns"
+                    :key="index"
+                    :column="column"
+                    :column-index="index"
+                    :is-first-column-blocked="isFirstColumnBlocked && index === 0"
+                    @add-card="addCard"
+                    @add-task="addTask"
+                    @task-updated="updateColumns">
+            </column>
         </div>
+        <button @click="clearLocalStorage">Очистить все данные</button>
     </div>
 </body>
 </html>
