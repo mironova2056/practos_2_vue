@@ -21,3 +21,62 @@ Vue.component('column', {
     computed: {
     },
 })
+Vue.component('cardTask', {
+    props: {
+      card: {
+          type: Object,
+          required:true
+      },
+      cardIndex: {
+          type:Number,
+          required:true
+      },
+      isFirstColumnBlock: {
+          type:Boolean,
+          default:false
+      }
+    },
+    template: `
+        <div class="card">
+            <h3>{{card.title}}</h3>
+            <input type="text" placeholder="Название карточки">
+            <div>
+                <div class="task">
+                    <label>
+                        <input type="checkbox">
+                        <span>{{task.text}}</span>
+                        <input type="text" placeholder="Введиде задачу">
+                    </label>
+                    <button>Сохранить</button>
+                </div>
+            </div>
+            <button>Добавить пункт</button>
+            <button>Сохранить заголовок</button>
+            <p>Завершено: {{card.completedAt}}</p> 
+        </div>
+    `,
+    methods: {
+        addTask() {
+            this.card.tasks.push({ text: '', completed: false, isEditing: true });
+        },
+        saveTask(taskIndex){
+            this.card.tasks[taskIndex].isEditing = false;
+            this.saveData();
+        },
+        saveCardTitle(){
+            if (this.card.newTitle) {
+                this.card.title = this.card.newTitle;
+                this.card.isEditing = false;
+                this.saveData();
+            }
+        },
+        saveData(){
+            this.$emit('save-data');
+        }
+    },
+    computed: {
+        canAddTask(){
+            return !this.card.completedAt && this.card.tasks.length < 5 && !this.isFirstColumnBlock;
+        }
+    }
+})
