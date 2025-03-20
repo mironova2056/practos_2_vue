@@ -14,13 +14,14 @@ Vue.component('column', {
         }
     },
     template: `
-        <div class="column">
+        <div class="column" :class="{ 'column-green': columnFillPercentage < 50, 'column-yellow': columnFillPercentage >= 50 && columnFillPercentage < 100, 'column-red': columnFillPercentage >= 100 }">
             <h2>{{ column.title }} ({{ column.cards.length }})</h2>
             <card-component 
                 v-for="(card, index) in column.cards"
                 :key="card.id"
                 :card="card"
                 :cardIndex="index"
+                :columnIndex="columnIndex"
                 :is-first-column-blocked="isFirstColumnBlocked"
                 @save-data="$emit('save-data')"
                 @task-updated="$emit('task-updated', columnIndex, index)">
@@ -31,6 +32,11 @@ Vue.component('column', {
     computed: {
         canAddCard() {
             return this.columnIndex === 0 && this.column.cards.length < 3 && !this.isFirstColumnBlocked;
+        },
+        columnFillPercentage(){
+            const totalCards = this.column.cards.length;
+            const maxCards = 5;
+            return (totalCards / maxCards) * 100;
         }
     }
 });
@@ -47,7 +53,16 @@ Vue.component('card-component', {
         isFirstColumnBlocked: {
             type: Boolean,
             default: false
+        },
+        columnIndex: {
+            type: Number,
+            required: true
         }
+    },
+    data() {
+        return {
+            showError: false,
+        };
     },
     template: `
         <div class="card">
@@ -57,6 +72,7 @@ Vue.component('card-component', {
                 type="text" 
                 v-model="card.newTitle" 
                 placeholder="Введите название карточки"
+                required
             />
             
             <div>
@@ -68,7 +84,7 @@ Vue.component('card-component', {
                         <input 
                             type="checkbox" 
                             v-model="task.completed" 
-                            :disabled="isFirstColumnBlocked || !!card.completedAt" 
+                            :disabled="isFirstColumnBlocked || !!card.completedAt || card.isEditing" 
                             @change="$emit('task-updated', cardIndex)">
                         <span v-if="!task.isEditing">{{ task.text }}</span>
                         <input 
@@ -76,20 +92,20 @@ Vue.component('card-component', {
                             type="text" 
                             v-model="task.text" 
                             placeholder="Введите задачу"
+                            @blur="saveTask(index)"
                         />
                     </label>
-                    <button v-if="task.isEditing" @click="saveTask(index)">Сохранить</button>
                 </div>
             </div>
 
             <button v-if="canAddTask" @click="addTask">Добавить пункт</button>
-            <button v-if="card.isEditing" @click="saveCardTitle">Сохранить</button>
+            <button v-if="card.isEditing" @click="saveCardTitle" :disabled="!card.newTitle">Сохранить</button>
             <p v-if="card.completedAt">Завершено: {{ card.completedAt }}</p>
         </div>
     `,
     computed: {
         canAddTask() {
-            return !this.card.completedAt && this.card.tasks.length < 5 && !this.isFirstColumnBlocked;
+            return this.columnIndex === 0 && !this.card.completedAt && this.card.tasks.length < 5 && !this.isFirstColumnBlocked;
         }
     },
     methods: {
@@ -101,11 +117,14 @@ Vue.component('card-component', {
             this.saveData();
         },
         saveCardTitle() {
-            if (this.card.newTitle) {
-                this.card.title = this.card.newTitle;
-                this.card.isEditing = false;
-                this.saveData();
+            if (!this.card.newTitle){
+                this.showError = true;
+                return;
             }
+            this.showError = false;
+            this.card.title = this.card.newTitle;
+            this.card.isEditing = false;
+            this.saveData();
         },
         saveData() {
             this.$emit('save-data');
@@ -133,7 +152,9 @@ const app = new Vue({
             const newCard = {
                 id: Date.now(),
                 title: '',
-                tasks: [{ text: '', completed: false, isEditing: true }],
+                tasks: [{ text: 'Задача 1', completed: false, isEditing: false },
+                        { text: 'Задача 2', completed: false, isEditing: false },
+                        { text: 'Задача 3', completed: false, isEditing: false }],
                 completedAt: null,
                 isEditing: true,
                 newTitle: ''

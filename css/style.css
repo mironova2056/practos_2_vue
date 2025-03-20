@@ -41,6 +41,17 @@ button {
     width: 30%;
     border: 1px solid #e0e0e0;
 }
+.column-green {
+    background-color: #e8f5e9;
+}
+
+.column-yellow {
+    background-color: #fff9c4;
+}
+
+.column-red {
+    background-color: #ffcdd2;
+}
 
 .column h2 {
     font-size: 20px;
@@ -53,6 +64,9 @@ button {
     width: 100%;
     margin: 0;
     background: #6c757d;
+}
+.column button:disabled {
+    background: #ccc;
 }
 
 .column button:hover {
@@ -148,4 +162,9 @@ p {
 .task input[type="checkbox"]:checked + span {
     text-decoration: line-through;
     color: #999;
+}
+.error-message {
+    color: #7a0606;
+    font-size: 14px;
+    margin-top: 5px;
 }
