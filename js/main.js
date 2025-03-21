@@ -152,9 +152,9 @@ const app = new Vue({
             const newCard = {
                 id: Date.now(),
                 title: '',
-                tasks: [{ text: 'Задача 1', completed: false, isEditing: false },
-                        { text: 'Задача 2', completed: false, isEditing: false },
-                        { text: 'Задача 3', completed: false, isEditing: false }],
+                tasks: [{ text: '', completed: false, isEditing: true },
+                        { text: '', completed: false, isEditing: true },
+                        { text: '', completed: false, isEditing: true }],
                 completedAt: null,
                 isEditing: true,
                 newTitle: ''
